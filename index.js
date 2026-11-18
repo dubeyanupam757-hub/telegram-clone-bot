@@ -14,7 +14,7 @@ if (!TOKEN || !ADMIN_ID) {
   process.exit(1);
 }
 
-const bot = new Telegraf(TOKEN);
+bot.use(session());
 
 // ==================================
 // DATABASE
