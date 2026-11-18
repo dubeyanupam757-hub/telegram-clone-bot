@@ -874,9 +874,35 @@ bot.catch((error, ctx) => {
 // START BOT
 // ==================================
 
-bot.launch()
-  .then(() => console.log("Task Wallet Bot is running!"))
-  .catch((error) => console.error("Startup error:", error));
+// ==================================
+// START BOT + HOST HEALTH SERVER
+// ==================================
 
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+const http = require("http");
+
+const PORT = process.env.PORT || 4009;
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {
+    "Content-Type": "text/plain"
+  });
+  res.end("Task Wallet Bot is running!");
+});
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log("Health server running on port " + PORT);
+
+  bot.launch()
+    .then(() => console.log("Task Wallet Bot is running!"))
+    .catch((error) => console.error("Bot startup error:", error));
+});
+
+process.once("SIGINT", () => {
+  bot.stop("SIGINT");
+  server.close();
+});
+
+process.once("SIGTERM", () => {
+  bot.stop("SIGTERM");
+  server.close();
+});
